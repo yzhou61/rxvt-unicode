@@ -2215,10 +2215,46 @@ rxvt_term::button_release (XButtonEvent &ev)
                 }
               else
 # endif
+#ifndef NO_SECONDARY_SCREEN
                 {
-                  scr_page (dirn, lines);
-                  scrollBar.show (1);
+                  /* on SECONDARY screen, we send "fake" UP/DOWN keys instead
+                   * (this allows to scroll within man, less, etc) */
+                  if (option (Opt_secondaryWheel) && current_screen != PRIMARY)
+                    {
+                       XKeyEvent event;
+                       event.display     = ev.display;
+                       event.window      = ev.window;
+                       event.root        = ev.root;
+                       event.subwindow   = ev.subwindow;
+                       event.time        = ev.time;
+                       event.x           = ev.x;
+                       event.y           = ev.y;
+                       event.x_root      = ev.x_root;
+                       event.y_root      = ev.y_root;
+                       event.same_screen = ev.same_screen;
+                       event.state       = 0;
+                       event.keycode     = XKeysymToKeycode(ev.display,
+                                            (dirn == UP) ? XK_Up : XK_Down);
+                       for ( ; lines > 0; --lines)
+                         {
+                            event.type = KeyPress;
+                            XSendEvent (event.display, event.window, True,
+                                        KeyPressMask, (XEvent *) &event);
+                            event.type = KeyRelease;
+                            XSendEvent (event.display, event.window, True,
+                                        KeyPressMask, (XEvent *) &event);
+                          }
+                    }
+                  /* on PRIMARY screen, we scroll in the buffer */
+                  else
+#endif
+                    {
+                       scr_page (dirn, lines);
+                       scrollBar.show (1);
+                    }
+#ifndef NO_SECONDARY_SCREEN
                 }
+#endif
             }
             break;
 #endif
@@ -2893,6 +2929,10 @@ rxvt_term::process_csi_seq ()
       return;
     }
 
+  /* remember the current row on position change, in case there's a clear screen
+   * right after, so that we can add "preserve" the buffer (e.g. on ^L) */
+  static int old_row = -1, was_moved = 0;
+  
   switch (ch)
     {
         /*
@@ -2956,6 +2996,12 @@ rxvt_term::process_csi_seq ()
 
       case CSI_CUP:		/* 8.3.21: (1,1) CURSOR POSITION */
       case CSI_HVP:		/* 8.3.64: (1,1) CHARACTER AND LINE POSITION */
+        /* if moving to row 1, remember current row in case a clear screen comes next */
+        if (nargs == 1 && arg[0] == 1 && current_screen == 0)
+          {
+            was_moved = 1;
+            old_row = screen.cur.row;
+          }
         scr_gotorc (arg[0] - 1, nargs < 2 ? 0 : (arg[1] - 1), 0);
         break;
 
@@ -2967,6 +3013,16 @@ rxvt_term::process_csi_seq ()
         break;
 
       case CSI_ED:		/* 8.3.40: (0) ERASE IN PAGE */
+        if (was_moved)
+          {
+            /* this is most likely a ^L, so we'll go back to where we where before
+             * the position change, add a screen of empty lines, then move back
+             * on top. that way the (scrolling) buffer will be preserved */
+            scr_gotorc (old_row, 0, 0);
+            for (int i = nrow - 1; i > 0; --i)
+                scr_add_lines (L"\r\n", 2);
+            scr_gotorc (0, 0, 0);
+          }
         scr_erase_screen (arg[0]);
         break;
 
@@ -3115,6 +3171,16 @@ rxvt_term::process_csi_seq ()
       default:
         break;
     }
+    if (was_moved > 0)
+      {
+        if (was_moved > 1)
+          {
+            was_moved = 0;
+            old_row = -1;
+          }
+        else
+          ++was_moved;
+      }
 }
 /*}}} */
 

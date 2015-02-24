@@ -27,6 +27,7 @@
  def(cursorBlink)
  def(secondaryScreen)
  def(secondaryScroll)
+ def(secondaryWheel)
  def(pastableTabs)
  def(cursorUnderline)
 #if ENABLE_FRILLS
