@@ -130,7 +130,8 @@
  *      (rather than a proportion (1/5) of savedlines buffer)
  *      when paging the savedlines with SHIFT-{Prior,Next} keys.
  */
-#define PAGING_CONTEXT_LINES 1
+/* Scroll less */
+/* #define PAGING_CONTEXT_LINES 1 */
 
 /*
  * Have either Ctrl+Tab or Mod4+Tab emit \e\t
