@@ -1597,7 +1597,7 @@ rxvt_term::x_cb (XEvent &ev)
             if (SHOULD_INVOKE (HOOK_MOTION_NOTIFY)
                 && HOOK_INVOKE ((this, HOOK_MOTION_NOTIFY, DT_XEVENT, &ev, DT_END)))
               ; // nop
-            else if (ev.xbutton.state & (Button1Mask | Button3Mask))
+            else if (ev.xbutton.state & (Button1Mask))
               {
                 while (XCheckTypedWindowEvent (dpy, vt, MotionNotify, &ev))
                   ;
