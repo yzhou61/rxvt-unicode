@@ -1447,7 +1447,7 @@ rxvt_term::create_windows (int argc, const char *const *argv)
   termwin_ev.start (display, top);
 
   /* vt cursor: Black-on-White is standard, but this is more popular */
-  unsigned int shape = XC_xterm;
+  unsigned int shape = XC_left_ptr;
 
 #ifdef HAVE_XMU
   if (rs[Rs_pointerShape])
